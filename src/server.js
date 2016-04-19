@@ -66,19 +66,7 @@ function onDraw(socket) {
 function onDisconnect(socket){
 	socket.on('disconnect', function(){
 		
-		
-    socket.leave(users[socket.name]);
-    
-    delete rooms[users[socket.name]];
-
-    if (Object.keys(rooms[users[socket.name]].users).length === 0) {
-      delete rooms[users[socket.name]];
-    }
-
-
-    delete users[socket.name];
-    console.log(rooms);
- 
+	
 		console.log("User Disconnected");
 	});
 }
