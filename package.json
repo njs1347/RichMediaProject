@@ -1,14 +1,14 @@
 {
-  "name": "syncing-data-2",
+  "name": "Rich-Media-2-Project",
   "version": "1.0.0",
-  "description": "Syncing Data 2 HW",
+  "description": "Semester Project For Rich Media 2",
   "main": "./src/server.js",
   "scripts": {
     "start": "node ./src/server.js",
     "pretest": "jshint ./src",
     "test": "echo \"Tests complete\""
   },
-  "author": "Nyrih Smith",
+  "author": "Nyrih Smith & Anthony Huff",
   "license": "ISC",
   "devDependencies": {
     "jshint": "^2.9.1"

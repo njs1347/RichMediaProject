@@ -24,39 +24,61 @@ console.log("Listening on 127.0.0.1:" + port);
 var io = socketio(app);
 
 //object to hold all of our connected users
-var users ={};
+var users = {};
+var rooms = {};
 
 function onJoin(socket){
-	socket.on('join', function(data){
-		users[data.username] = data.username;
-		
-		var Msg = {
-			Msg: "You Have Joined The Server"
-		};
-		
-		socket.emit('joined', Msg);
-		socket.username = data.username;
-	});
+	
+	socket.on("join", function (data) 
+	{
+    if (!rooms[data.room]) {
+      rooms[data.room] = {
+        users: [],
+        draws: {}
+      };
+    }
+		socket.name = data.name;
+		rooms[data.room].users[socket.name] = socket.name;
+		users[socket.name] = data.room;
+		console.log(rooms);
+		socket.join(data.room);
+		if (Object.keys(rooms[data.room].draws).length > 0) {
+		io.sockets.in(data.room).emit('drawCurrent', {
+			draws: rooms[data.room].draws
+      });
+    }
+  });
 }
 
 function onDraw(socket) {
-	socket.on('draw', function(data){
-		var drawPara = {};
-		
-		var timeStamp = new Date().getTime();
-		
-		//Construct draw call object
-		drawPara.x = data.x;
-		drawPara.y = data.y;
-		drawPara.user = socket.user;
-		drawPara.time = timeStamp;
-		
-		io.sockets.in('room1').emit('drawline',drawPara);
-	});
+
+	socket.on("drawsToServer", function (data) 
+	{
+		var room = rooms[users[socket.name]];
+		room.draws[data.self] = data.draws;
+		io.sockets.in(users[socket.name]).emit('drawline', {
+		self: data.self,
+		draws: room.draws[data.self]
+    });
+  });
 }
 
 function onDisconnect(socket){
-	socket.on('disconnect', function(data){
+	socket.on('disconnect', function(){
+		
+		
+    socket.leave(users[socket.name]);
+    
+    delete rooms[users[socket.name]];
+
+    if (Object.keys(rooms[users[socket.name]].users).length === 0) {
+      delete rooms[users[socket.name]];
+    }
+
+
+    delete users[socket.name];
+    console.log(rooms);
+ 
 		console.log("User Disconnected");
 	});
 }
@@ -67,5 +89,5 @@ io.sockets.on('connection', function(socket){
 	onDisconnect(socket);
 	onJoin(socket);
 	
-	socket.join('room1');
+	//socket.join('room1');
 });

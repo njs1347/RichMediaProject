@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
          font-family: tahoma, verdana, sans serif;
       }
 
-      #mainCanvas {
+      #canvas {
          background: #ffffff;
          position:absolute;
          z-index: 0;
@@ -44,70 +45,144 @@
 	<script>
 	
 		var draws = {};
+		
+		
 		//Imagine an object inside of draws to look like {x: 10, y: 10, width: 10, height: 10}
 		var socket;
-		var dragging;
+		var dragging = false;
 		var username;
 		var canvas;
 		var ctx;
+		var lineWidth;
+        var self;
+        var strokeStyle;
+		
+		
+		var DEFAULT_LINE_WIDTH = 3;
+		var DEFAULT_STROKE_STYLE = "black";
+        
+        function connectSocket(e) {
+            socket = io.connect();
+            
+			
+			//drawGrid(ctx, 'lightgray', 10, 10);
+		
+			//enableListeners();
+			//doClear();
+			
+			socket.on('connect', function () {
+				var user = document.querySelector("#username").value;
+				var room = document.querySelector("#roomname").value;
+				if (!user) {
+					user = 'unknown';
+				}
+				if (!room) {} else {
+					socket.emit('join', {
+					name: user,
+					room: room
+					});
+				}
+				ctx.clearRect(0, 0, 600, 500);
+				ctx.strokeRect(0, 0, 600, 500);
+
+		
+			
+			/*socket.on('joined', function(data) {
+				console.log(data.Msg);
+			});*/
+			
+            socket.on('drawline', function(data) {
+                ctx.beginPath();
+                //console.log(data.draws.points);
+                ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
+                for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
+                    ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
+                    ctx.stroke();
+                }
+            
+				ctx.closePath();
+				//handleMessage(data);
+				
+			});
+			
+			socket.on('changecolor', function(data) {
+				ctx.strokeStyle = strokeStyle;
+			});
+			
+			socket.on('drawCurrent', function(data){
+			console.log(data);
+				ctx.lineWidth = lineWidth;
+				for(drawline in data.draws){
+					ctx.beginPath();
+					ctx.moveTo(data.draws[drawline].points[0].x, data.draws[drawline].points[0].y);
+					for(var i=1; i < Object.keys(data.draws[drawline].points).length; i++){
+						ctx.lineTo(data.draws[drawline].points[i].x, data.draws[drawline].points[i].y);
+						ctx.lineWidth = lineWidth;
+						ctx.strokeStyle = strokeStyle;
+						ctx.stroke();
+					}
+					ctx.closePath();
+				}
+			});
+			});
+		}
+		
+      
+        
 		
 		function init()
 		{
-			socket = io.connect();
-			canvas = document.querySelector("#mainCanvas")
-			ctx = this.canvas.getContext('2d');
+			
+			canvas = document.querySelector("canvas")
+			ctx = canvas.getContext('2d');
+			
+			   
+			   ctx.strokeRect(0, 0, 600, 500);
 			
 			canvas.onmousedown = doMousedown;
 			canvas.onmousemove = doMousemove;
 			canvas.onmouseup = doMouseup;
+			canvas.onmouseout = doMouseout;
 			
-			var p = Math.floor(Math.random() * 100 + 1);
-			username = "user" + p;
-			socket.emit('join', {username: username});
+			lineWidth = DEFAULT_LINE_WIDTH;
+			ctx.lineWidth = lineWidth;
 			
-			drawGrid(ctx, 'lightgray', 10, 10);
-		
-			enableListeners();
-			doClear();
-		}
+			strokeStyle = DEFAULT_STROKE_STYLE;
+			ctx.strokeStyle = strokeStyle;
 			
-		function enableListeners() {
-			socket.on('joined', function(data) {
-				console.log(data.Msg);
-			});
+			document.querySelector("#lineWidthChooser").onchange = doLineWidthChange;
+			document.querySelector("#strokeStyleChooser").onchange = doColorChange;
 			
-			socket.on('drawline', function(data) {
-				handleMessage(data);
-				
-			});
+			var connect = document.querySelector("#connect");
+			connect.addEventListener('click', connectSocket);
 		}
 		
-		function draw(data)
-		{
-			doClear();
-			
-			var keys = Object.keys(draws);
-			
-			for(var i = 0; i < keys.length; i++)
-			{
-				var drawCall = draws[keys[i]];
-				
-				ctx.save();
-				if(drawCall.user !== username)
-				{
-					ctx.fillStyle = "black";
-				}
-				ctx.fillRect(drawCall.x, drawCall.y, 10, 10);
-				ctx.restore();
-				
-			};
+		function doLineWidthChange(e) {
+			lineWidth = e.target.value;
+		}
+		
+		function doColorChange(e){
+			strokeStyle = e.target.value;
 		}
 		
 		function doMousedown(e)
 		{
-			console.log(e.type);
-		
+			//console.log(e.type);
+			
 			dragging = true;
+			
+			var mouse = getMouse(e);
+		
+			var time = new Date().getTime();
+			
+			self = time.toString();
+			
+			draws[self] = {
+				points: [{
+					x: mouse.x,
+					y: mouse.y
+				}]
+			};
 		}
 	
 		function doMouseup(e) 
@@ -119,12 +194,31 @@
 		//HELPER FUNCTIONS
 		function doMousemove(e) 
 		{
- 		
+			console.log(lineWidth);
 			if(!dragging) return;
 		
 			var mouse = getMouse(e);
+			
+			ctx.strokeStyle = strokeStyle;
+			ctx.lineWidth = lineWidth;
+			
+			draws[self].points.push({
+				x: mouse.x,
+				y: mouse.y
+			});
+			socket.emit('drawsToServer', {
+				self: self,
+				draws: draws[self]
+			});
+
 		
-			socket.emit("draw",{x:mouse.x,y:mouse.y});
+			//socket.emit("draw",{x:mouse.x,y:mouse.y});
+		}
+		
+		function doMouseout(e) {
+		
+			console.log(e.type);
+			dragging = false;
 		}
 		
 		function getMouse(e){
@@ -134,19 +228,19 @@
 			return mouse;
 		}
 		
-		function doClear()
+		/*function doClear()
 		{
 			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 			drawGrid(ctx,'lightgray', 10, 10);
-		}
+		}*/
 		
-		function handleMessage(data)
+		/*function handleMessage(data)
 		{
 			draws[data.time] = data;
 			draw(data);
-		}
+		}*/
 		
-		function drawGrid(ctx, color, cellWidth, cellHeight){
+		/*function drawGrid(ctx, color, cellWidth, cellHeight){
 		// save the current drawing state as it existed before this function was called
 		ctx.save()
 		
@@ -162,13 +256,13 @@
 			ctx.moveTo(x, 0);
 			ctx.lineTo(x, ctx.canvas.height);
 			ctx.stroke();
-		}
+		}*/
 		
 		/*
 			Need horizontal lines!
 			You write it!
 		*/
-		for (var x = cellHeight + 0.5; x < ctx.canvas.height; x += cellHeight) {
+		/*for (var x = cellHeight + 0.5; x < ctx.canvas.height; x += cellHeight) {
 			ctx.beginPath();
 			ctx.moveTo(0, x);
 			ctx.lineTo(ctx.canvas.width, x);
@@ -176,7 +270,7 @@
 		}
 		// restore the drawing state
 		ctx.restore();
-	}
+	}*/
 			
 		
 		window.onload = init;
@@ -190,8 +284,42 @@
 	</script>
 </head>
 <body>
-	<canvas id="mainCanvas" width="800" height="600">
-	Get a real browser!
+
+	<label for="user">Username:
+		<input id="username" name="user" type="text" />
+	</label>
+	<label for="room">Room:
+		<input id="roomname" name="room" type="text" />
+	</label>
+		<input id="connect" type='button' value='connect' />
+		
+	<label>Line Width: 
+			<select id="lineWidthChooser">
+				<option value="1">1</option>
+				<option value="2">2</option>
+        		<option value="3" selected>3</option>
+        		<option value="4">4</option>
+				<option value="5">5</option>
+        		<option value="6">6</option>
+        		<option value="7">7</option>
+				<option value="8">8</option>
+        		<option value="9">9</option>
+        		<option value="10">10</option>
+    		</select>
+    	</label>
+		
+		<label>Line Color:
+			<select id="strokeStyleChooser">
+				<option value="black">Black</option>
+				<option value="red">Red</option>
+				<option value="orange">Orange</option>
+				<option value="blue">Blue</option>
+			</select>
+		</label>
+
+	
+	<canvas id="canvas"  width="600" height="500">
+	//Get a real browser!
 	</canvas>
 	
 </body>
