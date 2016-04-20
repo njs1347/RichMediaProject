@@ -94,6 +94,9 @@
             socket.on('drawline', function(data) {
                 ctx.beginPath();
                 //console.log(data.draws.points);
+                ctx.strokeStyle = data.draws.points[0].strokeStyle;
+                ctx.lineWidth = data.draws.points[0].lineWidth;
+                
                 ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
                 for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
                     ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
@@ -105,16 +108,21 @@
 				
 			});
 			
+                /*
 			socket.on('changecolor', function(data) {
 				ctx.strokeStyle = strokeStyle;
-			});
-			
+			});  */
+			 
 			socket.on('drawCurrent', function(data){
-			console.log(data);
+			    console.log("Data " + data);
 				ctx.lineWidth = lineWidth;
 				for(drawline in data.draws){
 					ctx.beginPath();
+                    ctx.lineWidth = data.draws[drawline].points[0].lineWidth;
+				    ctx.strokeStyle = data.draws[drawline].points[0].strokeStyle;
+                    
 					ctx.moveTo(data.draws[drawline].points[0].x, data.draws[drawline].points[0].y);
+                    
 					for(var i=1; i < Object.keys(data.draws[drawline].points).length; i++){
 						ctx.lineTo(data.draws[drawline].points[i].x, data.draws[drawline].points[i].y);
 						ctx.lineWidth = lineWidth;
@@ -180,21 +188,23 @@
 			draws[self] = {
 				points: [{
 					x: mouse.x,
-					y: mouse.y
+					y: mouse.y,
+                    lineWidth: lineWidth,
+                    strokeStyle: strokeStyle
 				}]
 			};
 		}
 	
 		function doMouseup(e) 
 		{
-			console.log(e.type);
+			//console.log(e.type);
 			dragging = false;
 		}
  
 		//HELPER FUNCTIONS
 		function doMousemove(e) 
 		{
-			console.log(lineWidth);
+			//console.log(lineWidth);
 			if(!dragging) return;
 		
 			var mouse = getMouse(e);
@@ -208,7 +218,8 @@
 			});
 			socket.emit('drawsToServer', {
 				self: self,
-				draws: draws[self]
+				draws: draws[self],
+                
 			});
 
 		
@@ -217,7 +228,7 @@
 		
 		function doMouseout(e) {
 		
-			console.log(e.type);
+			//console.log(e.type);
 			dragging = false;
 		}
 		

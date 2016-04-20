@@ -56,6 +56,7 @@ function onDraw(socket) {
 	{
 		var room = rooms[users[socket.name]];
 		room.draws[data.self] = data.draws;
+        //console.log(room.draws[data.self]);
 		io.sockets.in(users[socket.name]).emit('drawline', {
 		self: data.self,
 		draws: room.draws[data.self]
