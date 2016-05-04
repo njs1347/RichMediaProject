@@ -1,0 +1,267 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title Canvas Paint App
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
+    link(rel='stylesheet', type='text/css', href='/assets/style.css')
+    style.
+      li{
+      list-style: none;
+      display: inline;
+      font-size: 2em;
+      margin: 10px;
+      }
+      a{
+      position: fixed;
+      top: 50px;
+      right: 2em;
+      color: #E9E581;
+      text-decoration: none;
+      }
+      body{
+      height: 624px;
+      }
+      header{
+      margin-top: -13px;
+      }
+      #canvas {
+      background: #ffffff;
+      position:fixed;
+      z-index: 0;
+      padding-left: 0;
+      box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+      padding: 0;
+      margin: auto;
+      display: block;
+      top: 180px;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      }
+      #controls {
+      position: absolute;
+      z-index: 2;
+      left: 25px;
+      top: 25px;
+      }
+      label{
+      font-size: 14px;
+      margin-right:0.75em;
+      }
+    script(src='/socket.io/socket.io.js')
+    script.
+      var draws = {};
+      //Imagine an object inside of draws to look like {x: 10, y: 10, width: 10, height: 10}
+      var socket;
+      var dragging = false;
+      var username;
+      var canvas;
+      var ctx;
+      var lineWidth;
+      var self;
+      var strokeStyle;
+      var DEFAULT_LINE_WIDTH = 3;
+      var DEFAULT_STROKE_STYLE = "black";
+      function connectSocket(e) {
+      socket = io.connect();
+      //drawGrid(ctx, 'lightgray', 10, 10);
+      //enableListeners();
+      //doClear();
+      socket.on('connect', function () {
+      var user = document.querySelector("#user").value;
+      var room = document.querySelector("#roomname").value;
+      if (!user) {
+      user = 'unknown';
+      }
+      if (!room) {} else {
+      socket.emit('join', {
+      name: user,
+      room: room
+      });
+      }
+      ctx.clearRect(0, 0, 600, 500);
+      ctx.strokeRect(0, 0, 600, 500);
+      /*socket.on('joined', function(data) {
+      console.log(data.Msg);
+      });*/
+      socket.on('drawline', function(data) {
+      ctx.beginPath();
+      //console.log(data.draws.points);
+      ctx.strokeStyle = data.draws.points[0].strokeStyle;
+      ctx.lineWidth = data.draws.points[0].lineWidth;
+      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
+      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
+      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
+      ctx.stroke();
+      }
+      ctx.closePath();
+      //handleMessage(data);
+      });
+      /*
+      socket.on('changecolor', function(data) {
+      ctx.strokeStyle = strokeStyle;
+      });  */
+      socket.on('drawCurrent', function(data){
+      console.log("Data " + data);
+      ctx.lineWidth = lineWidth;
+      for(drawline in data.draws){
+      ctx.beginPath();
+      ctx.lineWidth = data.draws[drawline].points[0].lineWidth;
+      ctx.strokeStyle = data.draws[drawline].points[0].strokeStyle;
+      ctx.moveTo(data.draws[drawline].points[0].x, data.draws[drawline].points[0].y);
+      for(var i=1; i < Object.keys(data.draws[drawline].points).length; i++){
+      ctx.lineTo(data.draws[drawline].points[i].x, data.draws[drawline].points[i].y);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = strokeStyle;
+      ctx.stroke();
+      }
+      ctx.closePath();
+      }
+      });
+      });
+      }
+      function init()
+      {
+      canvas = document.querySelector("canvas")
+      ctx = canvas.getContext('2d');
+      ctx.strokeRect(0, 0, 600, 500);
+      canvas.onmousedown = doMousedown;
+      canvas.onmousemove = doMousemove;
+      canvas.onmouseup = doMouseup;
+      canvas.onmouseout = doMouseout;
+      lineWidth = DEFAULT_LINE_WIDTH;
+      ctx.lineWidth = lineWidth;
+      strokeStyle = DEFAULT_STROKE_STYLE;
+      ctx.strokeStyle = strokeStyle;
+      document.querySelector("#lineWidthChooser").onchange = doLineWidthChange;
+      document.querySelector("#strokeStyleChooser").onchange = doColorChange;
+      var connect = document.querySelector("#connect");
+      connect.addEventListener('click', connectSocket);
+      }
+      function doLineWidthChange(e) {
+      lineWidth = e.target.value;
+      }
+      function doColorChange(e){
+      strokeStyle = e.target.value;
+      }
+      function doMousedown(e)
+      {
+      //console.log(e.type);
+      dragging = true;
+      var mouse = getMouse(e);
+      var time = new Date().getTime();
+      self = time.toString();
+      draws[self] = {
+      points: [{
+      x: mouse.x,
+      y: mouse.y,
+      lineWidth: lineWidth,
+      strokeStyle: strokeStyle
+      }]
+      };
+      }
+      function doMouseup(e)
+      {
+      //console.log(e.type);
+      dragging = false;
+      }
+      //HELPER FUNCTIONS
+      function doMousemove(e)
+      {
+      //console.log(lineWidth);
+      if(!dragging) return;
+      var mouse = getMouse(e);
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = lineWidth;
+      draws[self].points.push({
+      x: mouse.x,
+      y: mouse.y
+      });
+      socket.emit('drawsToServer', {
+      self: self,
+      draws: draws[self],
+      });
+      //socket.emit("draw",{x:mouse.x,y:mouse.y});
+      }
+      function doMouseout(e) {
+      //console.log(e.type);
+      dragging = false;
+      }
+      function getMouse(e){
+      var mouse = {}
+      mouse.x = e.pageX - e.target.offsetLeft;
+      mouse.y = e.pageY - e.target.offsetTop;
+      return mouse;
+      }
+      /*function doClear()
+      {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      drawGrid(ctx,'lightgray', 10, 10);
+      }*/
+      /*function handleMessage(data)
+      {
+      draws[data.time] = data;
+      draw(data);
+      }*/
+      /*function drawGrid(ctx, color, cellWidth, cellHeight){
+      // save the current drawing state as it existed before this function was called
+      ctx.save()
+      // set some drawing state variables
+      ctx.strokeStyle = color;
+      ctx.fillStyle = '#ffffff';
+      ctx.lineWidth = 0.5;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      // vertical lines all set!
+      for (var x = cellWidth + 0.5; x < ctx.canvas.width; x += cellWidth) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, ctx.canvas.height);
+      ctx.stroke();
+      }*/
+      /*
+      Need horizontal lines!
+      You write it!
+      */
+      /*for (var x = cellHeight + 0.5; x < ctx.canvas.height; x += cellHeight) {
+      ctx.beginPath();
+      ctx.moveTo(0, x);
+      ctx.lineTo(ctx.canvas.width, x);
+      ctx.stroke();
+      }
+      // restore the drawing state
+      ctx.restore();
+      }*/
+      window.onload = init;
+  header
+    h1#title Tracer
+    nav
+      a(href='/login')
+      ul#globalNav
+        li
+          a(href='/logout') Log out
+  section#login
+      label(for='username') Username: 
+      input#user(name='username', type='text')
+      label(for='room') Room: 
+      input#roomname(name='room', type='text')
+      input#connect(type='button', value='connect')
+      label Line Width: 
+      select#lineWidthChooser
+        option(value='1') 1
+        option(value='2') 2
+        option(value='3', selected='') 3
+        option(value='4') 4
+        option(value='5') 5
+        option(value='6') 6
+        option(value='7') 7
+        option(value='8') 8
+        option(value='9') 9
+        option(value='10') 10
+      label Line Color: 
+      select#strokeStyleChooser
+        option(value='black') Black
+        option(value='red') Red
+        option(value='orange') Orange
+        option(value='blue') Blue
+  canvas#canvas(width='600', height='500') //Get a real browser!

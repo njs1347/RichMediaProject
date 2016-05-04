@@ -1,0 +1,28 @@
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title MVC
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
+    link(rel='stylesheet', type='text/css', href='/assets/style.css')
+  header
+    h1#title Tracer
+    nav
+      ul#globalNav
+        li
+          a(href='/login') Login
+        li
+          a(href='/signup') Sign up
+  section#login
+    form#loginForm.mainForm(name='loginForm', action='/login', method='POST')
+      label(for='username') Username: 
+      input#user(type='text', name='username', placeholder='username')
+      br
+      label(for='pass') Password: 
+      input#pass(type='password', name='pass', placeholder='password')
+      br
+      input(type='hidden', name='_csrf', value='#{csrfToken}')
+      a#loginSubmit.formSubmit(href='#') Sign in
+      br
+      br
+      #error
+  script(src='/assets/client.js')

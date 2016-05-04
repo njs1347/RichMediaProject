@@ -1,0 +1,28 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>MVC</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
+  </head>  
+  <header>
+  <h1 id="title">Tracer</h1>    
+  <nav>
+    <ul id="globalNav">  
+        <li><a href="/login">Login</a></li>
+        <li><a href="/signup">Sign up</a></li>
+    </ul>
+  </nav>
+  </header>
+  <section id="login">
+    <form class="mainForm" id="loginForm" name="loginForm" action="/login" method="POST">
+      <label for="username">Username: </label>
+      <input id="user" type="text" name="username" placeholder="username"/><br>
+      <label for="pass">Password: </label>
+      <input id="pass" type="password" name="pass" placeholder="password"/><br>
+      <input type="hidden" name="_csrf" value="#{csrfToken}"/><a class="formSubmit" id="loginSubmit" href="#">Sign in</a><br/><br/>
+      <div id="error"></div>
+    </form>
+  </section>
+  <script src="/assets/client.js"></script>
+</html>
