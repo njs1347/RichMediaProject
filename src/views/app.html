@@ -6,25 +6,24 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/assets/style.css">
     <style>
-        #globalnav{
-    position: fixed;
-    top: 30px;
-    right: 2em;
-}
-#globalnav li{
-    list-style: none;
-    display: inline;
-    font-size: 2em;
-    margin: 10px;
-}
-#globalnav a{
-    color: #E9E581;
-    text-decoration: none;
-}
-
-      body {
-      background: #eeeeee;
-      font-family: tahoma, verdana, sans serif;
+      li{
+      list-style: none;
+      display: inline;
+      font-size: 2em;
+      margin: 10px;
+      }
+      a{
+      position: fixed;
+      top: 50px;
+      right: 2em;
+      color: #E9E581;
+      text-decoration: none;
+      }
+      body{
+      height: 624px;
+      }
+      header{
+      margin-top: -13px;
       }
       #canvas {
       background: #ffffff;
@@ -32,10 +31,10 @@
       z-index: 0;
       padding-left: 0;
       box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
-      
-      
+      padding: 0;
+      margin: auto;
       display: block;
-      top: 10px;
+      top: 180px;
       bottom: 10px;
       left: 10px;
       right: 10px;
@@ -47,7 +46,7 @@
       top: 25px;
       }
       label{
-      font-size: 12px;
+      font-size: 14px;
       margin-right:0.75em;
       }
     </style>
@@ -71,7 +70,7 @@
       //enableListeners();
       //doClear();
       socket.on('connect', function () {
-      var user = document.querySelector("#username").value;
+      var user = document.querySelector("#user").value;
       var room = document.querySelector("#roomname").value;
       if (!user) {
       user = 'unknown';
@@ -87,19 +86,7 @@
       /*socket.on('joined', function(data) {
       console.log(data.Msg);
       });*/
-      socket.on('drawline', function(data) {
-      ctx.beginPath();
-      //console.log(data.draws.points);
-      ctx.strokeStyle = data.draws.points[0].strokeStyle;
-      ctx.lineWidth = data.draws.points[0].lineWidth;
-      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
-      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
-      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
-      ctx.stroke();
-      }
-      ctx.closePath();
-      //handleMessage(data);
-      });
+      
       /*
       socket.on('changecolor', function(data) {
       ctx.strokeStyle = strokeStyle;
@@ -138,14 +125,53 @@
       ctx.strokeStyle = strokeStyle;
       document.querySelector("#lineWidthChooser").onchange = doLineWidthChange;
       document.querySelector("#strokeStyleChooser").onchange = doColorChange;
+      document.querySelector("#clearButton").onclick = doClear;
       var connect = document.querySelector("#connect");
       connect.addEventListener('click', connectSocket);
       }
+      (function(){
+          var canvas = document.getElementById("canvas"),
+          ctx = canvas.getContext('2d');
+
+            // resize the canvas to fill browser window dynamically
+            window.addEventListener('resize', resizeCanvas, false);
+
+        function resizeCanvas() {
+            ctx.width = window.innerWidth;
+            ctx.height = window.innerHeight;
+
+            /**
+             * Your drawings need to be inside this function otherwise they will be reset when 
+             * you resize the browser window and the canvas goes will be cleared.
+             */
+            drawline(); 
+    }
+    resizeCanvas();
+
+socket.on('drawline', function(data) {
+      ctx.beginPath();
+      //console.log(data.draws.points);
+      ctx.strokeStyle = data.draws.points[0].strokeStyle;
+      ctx.lineWidth = data.draws.points[0].lineWidth;
+      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
+      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
+      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
+      ctx.stroke();
+      
+      }
+      ctx.closePath();
+      //handleMessage(data);
+      });
+      })();
       function doLineWidthChange(e) {
       lineWidth = e.target.value;
       }
       function doColorChange(e){
       strokeStyle = e.target.value;
+      }
+      function doClear(){
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		drawGrid(ctx,'lightgray', 10, 10);
       }
       function doMousedown(e)
       {
@@ -238,47 +264,40 @@
     </script>
   </head>
   <header>
-  <h1 id="title">Tracer</h1>
-  <nav>
-    <ul id="globalNav">
-        <li><a href="#">Logout</a></li>
-    </ul>
-  </nav>
+    <h1 id="title">Tracer</h1>
+    <nav><a href="/login"></a>
+      <ul id="globalNav">
+        <li><a href="/logout">Log out</a></li>
+      </ul>
+    </nav>
   </header>
-    <section id="login">
-    <form class="mainForm" id="loginForm" name="loginForm">
-        
+  <section id="login">
     <label for="username">Username: </label>
     <input id="user" name="username" type="text">
-    
     <label for="room">Room: </label>
     <input id="roomname" name="room" type="text">
-    
     <input id="connect" type="button" value="connect">
-        
     <label>Line Width: </label>
-      <select id="lineWidthChooser">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3" selected="">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-      </select>
-    
+    <select id="lineWidthChooser">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected="">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
     <label>Line Color: </label>
-      <select id="strokeStyleChooser">
-        <option value="black">Black</option>
-        <option value="red">Red</option>
-        <option value="orange">Orange</option>
-        <option value="blue">Blue</option>
-      </select>
-    
-    </form>
-    </section>
-    <canvas id="canvas" width="600" height="500">//Get a real browser!</canvas>
+    <select id="strokeStyleChooser">
+      <option value="black">Black</option>
+      <option value="red">Red</option>
+      <option value="orange">Orange</option>
+      <option value="blue">Blue</option>
+    </select>
+    <input id="clearButton" type="button" value="Clear">
+  </section>
+  <canvas id="canvas">//Get a real browser!</canvas>
 </html>

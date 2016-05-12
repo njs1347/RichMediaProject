@@ -85,19 +85,6 @@ html(lang='en')
       /*socket.on('joined', function(data) {
       console.log(data.Msg);
       });*/
-      socket.on('drawline', function(data) {
-      ctx.beginPath();
-      //console.log(data.draws.points);
-      ctx.strokeStyle = data.draws.points[0].strokeStyle;
-      ctx.lineWidth = data.draws.points[0].lineWidth;
-      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
-      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
-      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
-      ctx.stroke();
-      }
-      ctx.closePath();
-      //handleMessage(data);
-      });
       /*
       socket.on('changecolor', function(data) {
       ctx.strokeStyle = strokeStyle;
@@ -136,14 +123,48 @@ html(lang='en')
       ctx.strokeStyle = strokeStyle;
       document.querySelector("#lineWidthChooser").onchange = doLineWidthChange;
       document.querySelector("#strokeStyleChooser").onchange = doColorChange;
+      document.querySelector("#clearButton").onclick = doClear;
       var connect = document.querySelector("#connect");
       connect.addEventListener('click', connectSocket);
       }
+      (function(){
+      var canvas = document.getElementById("canvas"),
+      ctx = canvas.getContext('2d');
+      // resize the canvas to fill browser window dynamically
+      window.addEventListener('resize', resizeCanvas, false);
+      function resizeCanvas() {
+      ctx.width = window.innerWidth;
+      ctx.height = window.innerHeight;
+      /**
+      * Your drawings need to be inside this function otherwise they will be reset when
+      * you resize the browser window and the canvas goes will be cleared.
+      */
+      drawline();
+      }
+      resizeCanvas();
+      socket.on('drawline', function(data) {
+      ctx.beginPath();
+      //console.log(data.draws.points);
+      ctx.strokeStyle = data.draws.points[0].strokeStyle;
+      ctx.lineWidth = data.draws.points[0].lineWidth;
+      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
+      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
+      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
+      ctx.stroke();
+      }
+      ctx.closePath();
+      //handleMessage(data);
+      });
+      })();
       function doLineWidthChange(e) {
       lineWidth = e.target.value;
       }
       function doColorChange(e){
       strokeStyle = e.target.value;
+      }
+      function doClear(){
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      drawGrid(ctx,'lightgray', 10, 10);
       }
       function doMousedown(e)
       {
@@ -241,27 +262,28 @@ html(lang='en')
         li
           a(href='/logout') Log out
   section#login
-      label(for='username') Username: 
-      input#user(name='username', type='text')
-      label(for='room') Room: 
-      input#roomname(name='room', type='text')
-      input#connect(type='button', value='connect')
-      label Line Width: 
-      select#lineWidthChooser
-        option(value='1') 1
-        option(value='2') 2
-        option(value='3', selected='') 3
-        option(value='4') 4
-        option(value='5') 5
-        option(value='6') 6
-        option(value='7') 7
-        option(value='8') 8
-        option(value='9') 9
-        option(value='10') 10
-      label Line Color: 
-      select#strokeStyleChooser
-        option(value='black') Black
-        option(value='red') Red
-        option(value='orange') Orange
-        option(value='blue') Blue
-  canvas#canvas(width='600', height='500') //Get a real browser!
+    label(for='username') Username: 
+    input#user(name='username', type='text')
+    label(for='room') Room: 
+    input#roomname(name='room', type='text')
+    input#connect(type='button', value='connect')
+    label Line Width: 
+    select#lineWidthChooser
+      option(value='1') 1
+      option(value='2') 2
+      option(value='3', selected='') 3
+      option(value='4') 4
+      option(value='5') 5
+      option(value='6') 6
+      option(value='7') 7
+      option(value='8') 8
+      option(value='9') 9
+      option(value='10') 10
+    label Line Color: 
+    select#strokeStyleChooser
+      option(value='black') Black
+      option(value='red') Red
+      option(value='orange') Orange
+      option(value='blue') Blue
+    input#clearButton(type='button', value='Clear')
+  canvas#canvas //Get a real browser!
