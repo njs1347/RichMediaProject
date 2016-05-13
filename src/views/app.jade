@@ -81,10 +81,23 @@ html(lang='en')
       });
       }
       ctx.clearRect(0, 0, 600, 500);
-      ctx.strokeRect(0, 0, 600, 500);
+      //ctx.strokeRect(0, 0, 600, 500);
       /*socket.on('joined', function(data) {
       console.log(data.Msg);
       });*/
+      socket.on('drawline', function(data) {
+      ctx.beginPath();
+      //console.log(data.draws.points);
+      ctx.strokeStyle = data.draws.points[0].strokeStyle;
+      ctx.lineWidth = data.draws.points[0].lineWidth;
+      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
+      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
+      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
+      ctx.stroke();
+      }
+      ctx.closePath();
+      //handleMessage(data);
+      });
       /*
       socket.on('changecolor', function(data) {
       ctx.strokeStyle = strokeStyle;
@@ -124,38 +137,22 @@ html(lang='en')
       document.querySelector("#lineWidthChooser").onchange = doLineWidthChange;
       document.querySelector("#strokeStyleChooser").onchange = doColorChange;
       document.querySelector("#clearButton").onclick = doClear;
+      document.querySelector('#exportButton').onclick = doExport;
       var connect = document.querySelector("#connect");
       connect.addEventListener('click', connectSocket);
       }
+      /*
       (function(){
-      var canvas = document.getElementById("canvas"),
-      ctx = canvas.getContext('2d');
       // resize the canvas to fill browser window dynamically
       window.addEventListener('resize', resizeCanvas, false);
       function resizeCanvas() {
       ctx.width = window.innerWidth;
       ctx.height = window.innerHeight;
-      /**
-      * Your drawings need to be inside this function otherwise they will be reset when
-      * you resize the browser window and the canvas goes will be cleared.
-      */
       drawline();
       }
       resizeCanvas();
-      socket.on('drawline', function(data) {
-      ctx.beginPath();
-      //console.log(data.draws.points);
-      ctx.strokeStyle = data.draws.points[0].strokeStyle;
-      ctx.lineWidth = data.draws.points[0].lineWidth;
-      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
-      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
-      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
-      ctx.stroke();
-      }
-      ctx.closePath();
-      //handleMessage(data);
-      });
       })();
+      */
       function doLineWidthChange(e) {
       lineWidth = e.target.value;
       }
@@ -165,6 +162,13 @@ html(lang='en')
       function doClear(){
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       drawGrid(ctx,'lightgray', 10, 10);
+      }
+      function doExport(){
+      var data = canvas.toDataURL();
+      var windowName = "canvasImage";
+      var windowOptions = "left=0,top=0,width=" + canvas.width + ",height=" + canvas.height +",toolbar=0,resizable=0";
+      var myWindow = window.open(data,windowName,windowOptions);
+      myWindow.resizeTo(canvas.width,canvas.height); // needed so Chrome would display image
       }
       function doMousedown(e)
       {
@@ -264,9 +268,9 @@ html(lang='en')
   section#login
     label(for='username') Username: 
     input#user(name='username', type='text')
-    label(for='room') Room: 
-    input#roomname(name='room', type='text')
-    input#connect(type='button', value='connect')
+    label(for='room', style='margin-left: 10px') Room: 
+    input#roomname(name='room', type='text',)
+    input#connect(type='button', value='connect', style='margin-left: 10px; margin-right: 10px')
     label Line Width: 
     select#lineWidthChooser
       option(value='1') 1
@@ -285,5 +289,7 @@ html(lang='en')
       option(value='red') Red
       option(value='orange') Orange
       option(value='blue') Blue
-    input#clearButton(type='button', value='Clear')
-  canvas#canvas //Get a real browser!
+    input#clearButton(type='button', value='Clear', style='margin-left: 10px')
+    span
+      input#exportButton(type='button', value='save drawing', style='margin-left: 10px')
+  canvas#canvas(width='800', height='500') //Get a real browser!

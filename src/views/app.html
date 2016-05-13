@@ -82,10 +82,24 @@
       });
       }
       ctx.clearRect(0, 0, 600, 500);
-      ctx.strokeRect(0, 0, 600, 500);
+      //ctx.strokeRect(0, 0, 600, 500);
       /*socket.on('joined', function(data) {
       console.log(data.Msg);
       });*/
+     socket.on('drawline', function(data) {
+      ctx.beginPath();
+      //console.log(data.draws.points);
+      ctx.strokeStyle = data.draws.points[0].strokeStyle;
+      ctx.lineWidth = data.draws.points[0].lineWidth;
+      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
+      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
+      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
+      ctx.stroke();
+      
+      }
+      ctx.closePath();
+      //handleMessage(data);
+      });
       
       /*
       socket.on('changecolor', function(data) {
@@ -126,12 +140,15 @@
       document.querySelector("#lineWidthChooser").onchange = doLineWidthChange;
       document.querySelector("#strokeStyleChooser").onchange = doColorChange;
       document.querySelector("#clearButton").onclick = doClear;
+      document.querySelector('#exportButton').onclick = doExport;
       var connect = document.querySelector("#connect");
       connect.addEventListener('click', connectSocket);
+          
+          
       }
+        /*
       (function(){
-          var canvas = document.getElementById("canvas"),
-          ctx = canvas.getContext('2d');
+          
 
             // resize the canvas to fill browser window dynamically
             window.addEventListener('resize', resizeCanvas, false);
@@ -140,29 +157,15 @@
             ctx.width = window.innerWidth;
             ctx.height = window.innerHeight;
 
-            /**
-             * Your drawings need to be inside this function otherwise they will be reset when 
-             * you resize the browser window and the canvas goes will be cleared.
-             */
+ 
             drawline(); 
     }
     resizeCanvas();
 
-socket.on('drawline', function(data) {
-      ctx.beginPath();
-      //console.log(data.draws.points);
-      ctx.strokeStyle = data.draws.points[0].strokeStyle;
-      ctx.lineWidth = data.draws.points[0].lineWidth;
-      ctx.moveTo(data.draws.points[0].x, data.draws.points[0].y);
-      for (var i = 1; i < Object.keys(data.draws.points).length; i++) {
-      ctx.lineTo(data.draws.points[i].x, data.draws.points[i].y);
-      ctx.stroke();
-      
-      }
-      ctx.closePath();
-      //handleMessage(data);
-      });
+
       })();
+       */ 
+    
       function doLineWidthChange(e) {
       lineWidth = e.target.value;
       }
@@ -173,6 +176,14 @@ socket.on('drawline', function(data) {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		drawGrid(ctx,'lightgray', 10, 10);
       }
+      function doExport(){
+
+		var data = canvas.toDataURL(); 
+		var windowName = "canvasImage";
+		var windowOptions = "left=0,top=0,width=" + canvas.width + ",height=" + canvas.height +",toolbar=0,resizable=0";
+		var myWindow = window.open(data,windowName,windowOptions);
+		myWindow.resizeTo(canvas.width,canvas.height); // needed so Chrome would display image
+	 }
       function doMousedown(e)
       {
       //console.log(e.type);
@@ -298,6 +309,7 @@ socket.on('drawline', function(data) {
       <option value="blue">Blue</option>
     </select>
     <input id="clearButton" type="button" value="Clear">
+      <span><input id="exportButton" type="button" value="save drawing" style="margin-left: 10px"/></span>
   </section>
-  <canvas id="canvas">//Get a real browser!</canvas>
+  <canvas id="canvas" width="800" height="500">//Get a real browser!</canvas>
 </html>
