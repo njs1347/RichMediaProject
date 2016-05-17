@@ -1,3 +1,4 @@
+//middleware Login function
 var requiresLogin = function(req, res, next){
     
     if(!req.session.account){
@@ -7,6 +8,7 @@ var requiresLogin = function(req, res, next){
     next();
 };
 
+//middleware Logout function
 var requiresLogout = function(req, res, next){
   if(req.session.account){
       return res.redirect('/app');
@@ -15,5 +17,6 @@ var requiresLogout = function(req, res, next){
     next();
 };
 
+//module exports
 module.exports.requiresLogin = requiresLogin;
 module.exports.requiresLogout = requiresLogout;

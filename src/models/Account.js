@@ -40,6 +40,7 @@ AccountSchema.methods.toAPI = function() {
     };
 };
 
+//validate Password
 AccountSchema.methods.validatePassword = function(password, callback) {
 	var pass = this.password;
 	
@@ -68,6 +69,7 @@ AccountSchema.statics.generateHash = function(password, callback) {
 	});
 };
 
+//Authenticate name
 AccountSchema.statics.authenticate = function(name, callback) {
     
     var search = {
@@ -88,6 +90,7 @@ AccountSchema.statics.generateHash = function(password, callback) {
 	});
 };
 
+// Authenticate password
 AccountSchema.statics.authenticate = function(username, password, callback){
 	return AccountModel.findByUsername(username, function(err, doc) {
 
@@ -113,6 +116,6 @@ AccountSchema.statics.authenticate = function(username, password, callback){
 
 AccountModel = mongoose.model('Account', AccountSchema);
 
-
+//module exports
 module.exports.AccountModel = AccountModel;
 module.exports.AccountSchema = AccountSchema;

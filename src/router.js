@@ -1,7 +1,8 @@
+//call to required controllers
 var controllers = require('./controllers');
 var mid = require('./middleware');
 
-
+//router function to get and post the controllers
 var router = function(app){
     app.get("/login", mid.requiresLogout, controllers.Account.loginPage);
     app.post("/login", controllers.Account.login);
@@ -18,5 +19,5 @@ var router = function(app){
     
 };
 
-
+// module export
 module.exports = router;

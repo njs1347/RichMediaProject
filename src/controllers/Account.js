@@ -1,4 +1,4 @@
-//link to models
+//link to  required models
 var models = require('../models');
 
 //account method

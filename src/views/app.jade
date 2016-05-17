@@ -47,7 +47,8 @@ html(lang='en')
       }
       label{
       font-size: 14px;
-      margin-right:0.75em;
+      margin-right: -0.25em;
+      padding: 11px;
       }
     script(src='/socket.io/socket.io.js')
     script.
@@ -212,9 +213,7 @@ html(lang='en')
       ctx.lineWidth = lineWidth;
       draws[self].points.push({
       x: mouse.x,
-      y: mouse.y,
-      lineWidth: lineWidth,
-      strokeStyle: strokeStyle
+      y: mouse.y
       });
       socket.emit('drawsToServer', {
       self: self,
@@ -282,6 +281,7 @@ html(lang='en')
       textarea {
       display: block;
       background-color: #EEEEEE;
+      margin-left: 15px;
       }
       #command{margin-bottom: -10px;}
   body
