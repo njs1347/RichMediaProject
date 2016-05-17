@@ -212,11 +212,13 @@ html(lang='en')
       ctx.lineWidth = lineWidth;
       draws[self].points.push({
       x: mouse.x,
-      y: mouse.y
+      y: mouse.y,
+      lineWidth: lineWidth,
+      strokeStyle: strokeStyle
       });
       socket.emit('drawsToServer', {
       self: self,
-      draws: draws[self],
+      draws: draws[self]
       });
       //socket.emit("draw",{x:mouse.x,y:mouse.y});
       }
@@ -307,6 +309,9 @@ html(lang='en')
         option(value='red') Red
         option(value='orange') Orange
         option(value='blue') Blue
+        option(value='yellow') Yellow
+        option(value='purple') Purple
+        option(value='brown') Brown
       input#clearButton(type='button', value='Clear')
       span
         input#exportButton(type='button', value='save drawing', style='margin-left: 10px')

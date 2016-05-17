@@ -143,7 +143,7 @@
       {
       canvas = document.querySelector("canvas")
       ctx = canvas.getContext('2d');
-      ctx.strokeRect(0, 0, 600, 500);
+      ctx.strokeRect(0, 0, 800, 500);
       canvas.onmousedown = doMousedown;
       canvas.onmousemove = doMousemove;
       canvas.onmouseup = doMouseup;
@@ -230,7 +230,9 @@
       ctx.lineWidth = lineWidth;
       draws[self].points.push({
       x: mouse.x,
-      y: mouse.y
+      y: mouse.y,
+      lineWidth: lineWidth,
+      strokeStyle: strokeStyle
       });
       socket.emit('drawsToServer', {
       self: self,
@@ -330,6 +332,9 @@
       <option value="red">Red</option>
       <option value="orange">Orange</option>
       <option value="blue">Blue</option>
+      <option value="yellow">Yellow</option>
+      <option value="purple">Purple</option>
+      <option value="brown">Brown</option>
     </select>
     <input id="clearButton" type="button" value="Clear">
       <span><input id="exportButton" type="button" value="save drawing" style="margin-left: 10px"/></span>
