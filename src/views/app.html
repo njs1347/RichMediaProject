@@ -76,6 +76,10 @@
               var user = document.querySelector("#user").value;
               var sendBut = document.querySelector("#send");
               room = document.querySelector("#roomname").value;
+			  lineColor = document.querySelector("#strokeStyleChooser").value;
+			  lineWide = document.querySelector("#lineWidthChooser").value;
+			  console.log(lineColor);
+			  
               sendBut.addEventListener('click', function(e){
                         socket.emit('msgToServer', {name: user, msg: message.value, room: room})
                     });
@@ -85,7 +89,9 @@
               if (!room) {} else {
               socket.emit('join', {
               name: user,
-              room: room
+              room: room,
+			  lineColor: lineColor,
+			  lineWide: lineWide
           });
       }
           
@@ -94,7 +100,7 @@
              chat.innerHTML += data.name + ': ' + data.msg + "&#13;";                                                        
              console.log(data); 
           });
-      ctx.clearRect(0, 0, 800, 500);
+      ctx.clearRect(0, 0, 700, 500);
      
      socket.on('drawline', function(data) {
       ctx.beginPath();
@@ -112,7 +118,7 @@
       
       socket.on('drawCurrent', function(data){
       console.log("Data " + data);
-      ctx.lineWidth = lineWidth;
+      //ctx.lineWidth = lineWidth;
       for(drawline in data.draws){
       ctx.beginPath();
       ctx.lineWidth = data.draws[drawline].points[0].lineWidth;
@@ -120,8 +126,10 @@
       ctx.moveTo(data.draws[drawline].points[0].x, data.draws[drawline].points[0].y);
       for(var i=1; i < Object.keys(data.draws[drawline].points).length; i++){
       ctx.lineTo(data.draws[drawline].points[i].x, data.draws[drawline].points[i].y);
-      ctx.lineWidth = lineWidth;
-      ctx.strokeStyle = strokeStyle;
+      //ctx.lineWidth = lineWidth;
+      //ctx.strokeStyle = strokeStyle;
+	  lineColor:lineColor;
+	  lineWide:lineWide;
       ctx.stroke();
       }
       ctx.closePath();
@@ -133,7 +141,7 @@
       {
       canvas = document.querySelector("canvas")
       ctx = canvas.getContext('2d');
-      ctx.strokeRect(0, 0, 800, 500);
+      ctx.strokeRect(0, 0, 700, 500);
       canvas.onmousedown = doMousedown;
       canvas.onmousemove = doMousemove;
       canvas.onmouseup = doMouseup;
@@ -147,10 +155,13 @@
       document.querySelector("#clearButton").onclick = doClear;
       document.querySelector('#exportButton').onclick = doExport;
       var connect = document.querySelector("#connect");
-      connect.addEventListener('click', connectSocket);
-          
-          
-      }
+	 connect.addEventListener('click', connectSocket);
+	 connect.addEventListener('click', function(e){
+                        socket.emit('join', {room: room, lineColor:lineColor, lineWide:lineWide})
+                    });
+			  
+			  
+		  }
     
       function doLineWidthChange(e) {
       lineWidth = e.target.value;
@@ -270,7 +281,7 @@
     <input id="clearButton" type="button" value="Clear">
       <span><input id="exportButton" type="button" value="save drawing" style="margin-left: 10px"/></span>
   </section>
-  <canvas id="canvas" width="800" height="500">//Get a real browser!</canvas>
+  <canvas id="canvas" width="700" height="500">//Get a real browser!</canvas>
 	<label for="message">Message:</label>
 	<input id="message" name="message" type="text"/>
 	<input id="send" type="button" value="send" />
