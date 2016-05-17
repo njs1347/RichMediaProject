@@ -6,6 +6,7 @@ var iterations = 10000;
 var saltLength = 64;
 var keyLength = 64;
 
+//JSON objects for accounts
 var AccountSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -49,7 +50,7 @@ AccountSchema.methods.validatePassword = function(password, callback) {
 		return callback(true);
 	});
 };
-
+//find username based on name
 AccountSchema.statics.findByUsername = function(name, callback) {
 
     var search = {

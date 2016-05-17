@@ -1,4 +1,3 @@
-
 var http = require('http');
 var fs = require('fs');
 var socketio = require('socket.io');
@@ -116,7 +115,17 @@ function onJoin(socket){
         draws: {}
       };
     }
+        
+        var joinMsg={
+           name: 'server',
+           msg: 'There are ' + Object.keys(users).length + ' users online'
+       };
+        
+        io.sockets.in(data.room).emit('msg', joinMsg);
+        
 		socket.name = data.name;
+        
+        
 		rooms[data.room].users[socket.name] = socket.name;
 		users[socket.name] = data.room;
 		console.log(rooms);
@@ -126,8 +135,28 @@ function onJoin(socket){
 			draws: rooms[data.room].draws
       });
     }
+        
+        
+        socket.emit('msg', {
+          name: 'server',
+          msg: 'You joined the room'     
+       });
   });
 }
+
+
+
+var onMsg = function(socket){
+    socket.on('msgToServer', function(data){
+       io.sockets.in(data.room).emit('msg',{
+           name: socket.name,
+           msg: data.msg    
+         });           
+
+    });
+       
+};
+
 
 function onDraw(socket) {
 
@@ -145,9 +174,12 @@ function onDraw(socket) {
 
 function onDisconnect(socket){
 	socket.on('disconnect', function(){
-		
-	
-		console.log("User Disconnected");
+		socket.broadcast.to(rooms).emit('msg',{
+          name: 'server',
+          msg: socket.name + " has left the room." 
+       });
+	   delete users[socket.name];
+		console.log(socket.name + " Disconnected");
 	});
 }
 
@@ -156,6 +188,7 @@ io.sockets.on('connection', function(socket){
 	onDraw(socket);
 	onDisconnect(socket);
 	onJoin(socket);
+    onMsg(socket);
 	
 	//socket.join('room1');
 });

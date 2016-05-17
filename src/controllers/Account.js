@@ -1,20 +1,26 @@
+//link to models
 var models = require('../models');
 
+//account method
 var Account = models.Account;
 
+//login page function
 var loginPage = function(req,res){
   res.render('login');  
 };
 
+//signup page fuction
 var signupPage = function(req, res){
   res.render('signup');  
 };
 
+//logout function
 var logout = function(req, res){
     req.session.destroy();
   res.redirect('/');  
 };
 
+//login function for username and password
 var login = function(req, res){
     
     var username = req.body.username;
@@ -35,6 +41,7 @@ var login = function(req, res){
     
 };
 
+//signup function for error messeges
 var signup = function(req, res){
     var body = req.body;
     
@@ -69,6 +76,7 @@ var signup = function(req, res){
     });
 };
 
+//module exports
 module.exports.loginPage = loginPage;
 module.exports.login = login;
 module.exports.logout = logout;

@@ -64,13 +64,19 @@ html(lang='en')
       var DEFAULT_LINE_WIDTH = 3;
       var DEFAULT_STROKE_STYLE = "black";
       function connectSocket(e) {
+      var message = document.querySelector("#message");
+      var chat = document.querySelector("#chat");
       socket = io.connect();
       //drawGrid(ctx, 'lightgray', 10, 10);
       //enableListeners();
       //doClear();
       socket.on('connect', function () {
       var user = document.querySelector("#user").value;
-      var room = document.querySelector("#roomname").value;
+      var sendBut = document.querySelector("#send");
+      room = document.querySelector("#connect").value;
+      sendBut.addEventListener('click', function(e){
+      socket.emit('msgToServer', {name: user, msg: message.value, room: room})
+      });
       if (!user) {
       user = 'unknown';
       }
@@ -80,7 +86,12 @@ html(lang='en')
       room: room
       });
       }
-      ctx.clearRect(0, 0, 600, 500);
+      //listener for msg event
+      socket.on('msg', function(data){
+      chat.innerHTML += data.name + ': ' + data.msg + "&#13;";
+      console.log(data);
+      });
+      ctx.clearRect(0, 0, 800, 500);
       //ctx.strokeRect(0, 0, 600, 500);
       /*socket.on('joined', function(data) {
       console.log(data.Msg);
@@ -125,7 +136,7 @@ html(lang='en')
       {
       canvas = document.querySelector("canvas")
       ctx = canvas.getContext('2d');
-      ctx.strokeRect(0, 0, 600, 500);
+      ctx.strokeRect(0, 0, 800, 500);
       canvas.onmousedown = doMousedown;
       canvas.onmousemove = doMousemove;
       canvas.onmouseup = doMouseup;
@@ -265,31 +276,42 @@ html(lang='en')
       ul#globalNav
         li
           a(href='/logout') Log out
-  section#login
-    label(for='username') Username: 
-    input#user(name='username', type='text')
-    label(for='room', style='margin-left: 10px') Room: 
-    input#roomname(name='room', type='text',)
-    input#connect(type='button', value='connect', style='margin-left: 10px; margin-right: 10px')
-    label Line Width: 
-    select#lineWidthChooser
-      option(value='1') 1
-      option(value='2') 2
-      option(value='3', selected='') 3
-      option(value='4') 4
-      option(value='5') 5
-      option(value='6') 6
-      option(value='7') 7
-      option(value='8') 8
-      option(value='9') 9
-      option(value='10') 10
-    label Line Color: 
-    select#strokeStyleChooser
-      option(value='black') Black
-      option(value='red') Red
-      option(value='orange') Orange
-      option(value='blue') Blue
-    input#clearButton(type='button', value='Clear', style='margin-left: 10px')
-    span
-      input#exportButton(type='button', value='save drawing', style='margin-left: 10px')
-  canvas#canvas(width='800', height='500') //Get a real browser!
+    style.
+      textarea {
+      display: block;
+      background-color: #EEEEEE;
+      }
+      #command{margin-bottom: -10px;}
+  body
+    section#login
+      label(for='username') Username: 
+      input#user(name='username', type='text')
+      label(for='room') Room: 
+      input#roomname(name='room', type='text')
+      input#connect(type='button', value='connect')
+      label Line Width: 
+      select#lineWidthChooser
+        option(value='1') 1
+        option(value='2') 2
+        option(value='3', selected='') 3
+        option(value='4') 4
+        option(value='5') 5
+        option(value='6') 6
+        option(value='7') 7
+        option(value='8') 8
+        option(value='9') 9
+        option(value='10') 10
+      label Line Color: 
+      select#strokeStyleChooser
+        option(value='black') Black
+        option(value='red') Red
+        option(value='orange') Orange
+        option(value='blue') Blue
+      input#clearButton(type='button', value='Clear')
+      span
+        input#exportButton(type='button', value='save drawing', style='margin-left: 10px')
+    canvas#canvas(width='800', height='500') //Get a real browser!
+    label(for='message') Message:
+    input#message(name='message', type='text')
+    input#send(type='button', value='send')
+    textarea#chat(rows='20', cols='40', readonly='')  
