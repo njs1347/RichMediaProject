@@ -75,7 +75,7 @@
           socket.on('connect', function () {
               var user = document.querySelector("#user").value;
               var sendBut = document.querySelector("#send");
-              room = document.querySelector("#connect").value;
+              room = document.querySelector("#roomname").value;
               sendBut.addEventListener('click', function(e){
                         socket.emit('msgToServer', {name: user, msg: message.value, room: room})
                     });
