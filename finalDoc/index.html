@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" type="text/css" href="ss1.css">
+	
+	<title>Design Document Final</title>
+</head>
+<body>
+	<h2>IGME-430-01 Semester Proj. Final Documentation</h2>
+    <h3> By: Nyrih Smith and Anthony Huff</h3>
+    <h4>Purpose and final features</h4>
+    <p>The final purpose of our app is to draw on a canvas with multiple people across a server. The features of the app are drawing on a single canvas across a joined room, the UI includes synced items as well, such as line width,
+    line color. Other UI features include a client side clear button (was supposed to be synced across everyone but we had trouble) that clears the clients canvas. A save picture button that will export what is on the canvas into a 
+	new window where the user can right-click and perform a save as on the picture, to save for themselves. We also have a chat room to the right of the canvas that when a user connects the drawing roo m they connect to the chat room corresponding to the room they picked. Users in the same room can talk to each other via the chat room. Before you can get into the app, a user has to sign in to the program to use it. If a user doesn't have an account they can visit the sign up page to make an account. </p>
+    <h4>What we did well/didn't do well</h4>
+	<p>The things we did well were the drawing across the server to the clients. It works relatively well with a couple bugs. The syncing of the UI is pretty well done too. The login/signup system works to the way we wanted. Things we would've improved upon was the act of drawing itself. We have lag issues with the brush where it lags the page it seems. Chat has a bug where it remembers what rooms you've been in. If you join room 1 then go into 2 you will be in both. Also when joining a room with a drawing already on it the stroke color of the drawing for everyone in the room changes to whatever their stroke color is in the UI (hard to explain easy to show). </p>
+    <h4>Architecture</h4>
+    <img src="finalDiagram.jpg" alt="diagram">
+    
+    <h4>What interested us most</h4>
+    <p>We had an interesting time figuring out multiple things with this project. The syncing of the data points across the server so that all people in the room saw the same drawing. Along side that syncing the UI options across the server was a real fun time also.</p>
+	 
+</body>
+</html>
