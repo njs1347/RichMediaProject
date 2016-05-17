@@ -149,5 +149,3 @@ a{
             .block a:hover{
                 color: #DE1B1B;
             }
-
-@media only screen and (min-width: 600px) {#canvas {margin: 2.0em;}}
